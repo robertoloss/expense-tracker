@@ -7,13 +7,15 @@ import Link from "next/link"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator, BreadcrumbPage, BreadcrumbLink } from "./ui/breadcrumb"
 import { Input } from "./ui/input"
 import { PanelLeftIcon, HomeIcon, SearchIcon, LineChartIcon, PackageIcon, Package2Icon, ShoppingCartIcon, UsersIcon } from "./ui/icons"
+import AuthButton from "./AuthButton"
+import { ThemeToggle } from "./theme-toggle"
 
 
 
 export default function Header() {
 
 	return (
-		<header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+		<header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:ml-14">
 			<Sheet>
 				<SheetTrigger asChild>
 					<Button size="icon" variant="outline" className="sm:hidden">
@@ -79,46 +81,38 @@ export default function Header() {
 							</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
-					<BreadcrumbSeparator />
-					<BreadcrumbItem>
-						<BreadcrumbLink asChild>
-							<Link href="#" prefetch={false}>
-								Products
-							</Link>
-						</BreadcrumbLink>
-					</BreadcrumbItem>
-					<BreadcrumbSeparator />
-					<BreadcrumbItem>
-						<BreadcrumbPage>All Products</BreadcrumbPage>
-					</BreadcrumbItem>
 				</BreadcrumbList>
 			</Breadcrumb>
-			<div className="relative ml-auto flex-1 md:grow-0">
-				<SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+			<div className="flex flex-row relative ml-auto flex-1 md:grow-0">
+				<AuthButton />
+				<ThemeToggle />
+				{/*<SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 				<Input
 					type="search"
 					placeholder="Search..."
 					className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-				/>
+				/>*/}
 			</div>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button variant="outline" size="icon" className="overflow-hidden rounded-full">
-						<img
-							src="/placeholder.svg"
+						{/*<img
+							src="../app/favicon.ico"
 							width={36}
 							height={36}
 							alt="Avatar"
 							className="overflow-hidden rounded-full"
-						/>
+						/>*/}
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end">
-					<DropdownMenuLabel>My Account</DropdownMenuLabel>
-					<DropdownMenuSeparator />
+				<DropdownMenuContent 
+					align="end" 
+					className="flex flex-col bg-background p-4 gap-4 border rounded-lg border-border
+						mt-2 font-normal text-sm"
+				>
+					<DropdownMenuItem>My Account</DropdownMenuItem>
 					<DropdownMenuItem>Settings</DropdownMenuItem>
 					<DropdownMenuItem>Support</DropdownMenuItem>
-					<DropdownMenuSeparator />
 					<DropdownMenuItem>Logout</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

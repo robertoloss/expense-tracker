@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+	overscroll-behavior: none;
+}
+@media only screen and (max-width: 600px) {
+	body {
+		overscroll-behavior: auto;
+	}
+}
+
 @layer base {
 	:root {
 		--background: 0 0% 100%;

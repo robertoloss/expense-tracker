@@ -1,25 +1,21 @@
-import AuthButton from "@/components/AuthButton";
-import Dashboard from "@/components/dashboard";
-import { ThemeToggle } from "@/components/theme-toggle";
+import Dashboard from "@/components/Dashboard";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic' // 
 export default async function ProtectedPage() {
   const supabase = createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user }, } = await supabase.auth.getUser();
   if (!user) {
     return redirect("/login");
   }
+	console.log("hello")
+	const { data: Expenses, error } = await supabase
+		.from('Expenses')
+		.select('*')
+		.eq('user',user.id)
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-4 items-center">
-			<AuthButton />
-			<ThemeToggle />
-			<Dashboard />
-    </div>
+			<Dashboard expenses={Expenses}/>
   );
 }
