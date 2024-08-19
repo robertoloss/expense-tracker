@@ -10,12 +10,12 @@ export default async function ProtectedPage() {
     return redirect("/login");
   }
 	console.log("hello")
-	const { data: Expenses, error } = await supabase
-		.from('Expenses')
+	const { data: Expense } = await supabase
+		.from('Expense')
 		.select('*')
 		.eq('user',user.id)
 
   return (
-			<Dashboard expenses={Expenses}/>
+			<Dashboard expenses={Expense}/>
   );
 }
