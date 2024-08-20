@@ -6,9 +6,10 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLab
 import { MoveHorizontalIcon } from "./ui/icons"
 
 type Props = {
-	expensesFromServer: Expense[] | null
+	expenses: Expense[] | null
 }
-export default function TableComponent({ expensesFromServer } : Props) {
+export default function TableComponent({ expenses } : Props) {
+	console.log("\nExpenses in Table: ", expenses)
 
 	return (
 		<Table>
@@ -25,15 +26,16 @@ export default function TableComponent({ expensesFromServer } : Props) {
 			</TableHeader>
 			<TableBody>
 
-				{expensesFromServer?.map(expense => {
+				{expenses?.map(expense => {
 					const date = new Date(expense.created_at)
 					const year = date.getFullYear()
 					const month = String(date.getMonth() + 1).padStart(2, '0');
 					const day = String(date.getDate()).padStart(2, '0');
 					const hours = String(date.getHours()).padStart(2, '0');
 					const minutes = String(date.getMinutes()).padStart(2, '0');					
+					const key = new Date().getTime().toString() + expense.id
 
-					return <TableRow key={expense.id}>
+					return <TableRow key={key}>
 						<TableCell className="font-medium">{expense.kind}</TableCell>
 						<TableCell>
 							<Badge variant="outline">{expense.kind}</Badge>
