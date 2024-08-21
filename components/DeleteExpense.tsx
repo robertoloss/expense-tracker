@@ -44,10 +44,9 @@ export default function DeleteExpense({ expense, updateExpenses }: Props) {
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+					<AlertDialogTitle>Are you sure?</AlertDialogTitle>
 					<AlertDialogDescription>
-						This action cannot be undone. This will permanently delete your account
-						and remove your data from our servers.
+						This action cannot be undone. This will permanently delete this expense from your account
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
