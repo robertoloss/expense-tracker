@@ -113,6 +113,7 @@ export default function Dashboard({ expenses }: Props)  {
 										//optimisticExpenses && 
 										<TableComponent 
 											expenses={optimisticExpenses} 
+											updateExpenses={updateExpenses}
 										/>
 									}
                 </CardContent>

@@ -8,8 +8,6 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "./ui/button"
 import { CirclePlusIcon } from "./ui/icons"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Input } from "@/components/ui/input"
 import { UpdateExpenses } from "./Dashboard"
@@ -33,10 +31,9 @@ export default function AddExpense({ updateExpenses }: Props) {
 
   async function onSubmit(data: FormData) {
 		const username = data.get("username")?.toString()
-		try {
-			zUsername.parse(username)
-		} catch(error) {
-			console.log(error)
+		const testUsername = zUsername.safeParse(username)
+		if (!testUsername.success) {
+			console.log(testUsername.error.issues)
 			return
 		}
 		const newExpense: Expense = {
