@@ -12,12 +12,9 @@ type Props = {
 	updateExpenses: UpdateExpenses
 }
 export default function TableRowComp({ expense, updateExpenses }: Props) {
-	const date = new Date(expense.created_at)
-	const year = date.getFullYear()
-	const month = String(date.getMonth() + 1).padStart(2, '0');
-	const day = String(date.getDate()).padStart(2, '0');
-	const hours = String(date.getHours()).padStart(2, '0');
-	const minutes = String(date.getMinutes()).padStart(2, '0');					
+	const date = new Date(expense?.expense_date as Date)
+	const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
+	const formattedDate = date.toLocaleDateString('en-US', options);
 
 	return (
 		<TableRow>
@@ -28,7 +25,7 @@ export default function TableRowComp({ expense, updateExpenses }: Props) {
 			<TableCell className="hidden md:table-cell">
 				${expense.amount?.toString()}
 			</TableCell>
-			<TableCell className="hidden md:table-cell">{`${year}-${month}-${day} ${hours}:${minutes}`}</TableCell>
+			<TableCell className="hidden md:table-cell">{`${formattedDate}`}</TableCell>
 			<TableCell>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>

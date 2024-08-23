@@ -17,7 +17,7 @@ export default function TableComponent({ expenses, updateExpenses } : Props) {
 					<TableHead>Name</TableHead>
 					<TableHead>Status</TableHead>
 					<TableHead className="hidden md:table-cell">Price</TableHead>
-					<TableHead className="hidden md:table-cell">Created at</TableHead>
+					<TableHead className="hidden md:table-cell">Date</TableHead>
 					<TableHead>
 						<span className="sr-only">Actions</span>
 					</TableHead>

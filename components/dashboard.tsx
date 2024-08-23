@@ -27,10 +27,7 @@ export default function Dashboard({ expenses }: Props)  {
 		{action: 'create' | 'delete' | 'update', expense?: Expense, id?: string }) => {
 			switch (action) {
 				case "create":
-					console.log("optimistic update")
-					//console.log("state: ", state)
 					const result = expense && state ? [...state, expense] : state || [] 
-					console.log("result to return: ", result)
 					return result 
 				case "delete":
 					return id && state ? state.filter(e => e.id.toString() != id) : state || []
@@ -51,7 +48,6 @@ export default function Dashboard({ expenses }: Props)  {
     };
 	},[supabase])
 
-	console.log("Dashboard rerendered")
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-y-hidden">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">

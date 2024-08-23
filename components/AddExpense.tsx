@@ -16,6 +16,7 @@ import { createClient } from "@/utils/supabase/client"
 import { Expense } from "@prisma/client"
 import getExpenses from "@/app/actions/getExpenses"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+import { DatePicker } from "./DatePicker"
 
 const zUsername = z.string().min(2, {
     message: "Username must be at least 2 characters.",
@@ -26,6 +27,7 @@ type Props = {
 }
 export default function AddExpense({ updateExpenses }: Props) {
 	const [ open, setOpen ] = useState(false)
+	const [date, setDate] = useState<Date | undefined>(new Date())
 	const supabase = createClient()
 	const [ , startTransition ] = useTransition()
 
@@ -42,14 +44,13 @@ export default function AddExpense({ updateExpenses }: Props) {
 				created_at: new Date(),
 				user: '197f73a9-0499-4b6c-8283-38cc8d4d0d9c',
 				amount: null,
-				expense_date: new Date(),
+				expense_date: date as Date || null,
 			}
 		startTransition(()=>updateExpenses({
 			action: 'create',
 			expense: newExpense 
 		}))
 		delete (newExpense as { id?: bigint }).id
-		delete (newExpense as { created_at?: Date }).created_at
 		await supabase
 			.from('Expense')
 			.insert(newExpense)
@@ -78,7 +79,11 @@ export default function AddExpense({ updateExpenses }: Props) {
 						<form
 							action={onSubmit}
 							className="space-y-8"
-						>
+						>	
+							<DatePicker 
+								date={date}
+								setDate={setDate}
+							/>
 							<Input type="text" name="username" placeholder="kind"/>
 							<Button type="submit">Submit</Button>
 						</form>
