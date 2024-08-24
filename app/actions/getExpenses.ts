@@ -7,11 +7,34 @@ const supabase = createClient()
 export default async function getExpenses() {
 	const { data: { user }, } = await supabase.auth.getUser();
 
-	const { data: Expense } = await supabase
+	const { data: profile_id } = await supabase
+		.from('Profile')
+		.select('id')
+		.eq('user', user?.id)
+		.limit(1)
+		.single()
+	if (!profile_id) {
+		console.error("No profile id found")
+		return
+	}	
+	//console.log("profile_id: ", profile_id)
+
+	const { data: projects } = await supabase
+		.from('Collaborator')
+		.select('project')
+		.eq('profile', profile_id.id)
+	if (!projects) {
+		console.error("No project found")
+		return
+	}
+	//console.log("projects: ", projects)
+
+	const { data: expenses } = await supabase
 		.from('Expense')
 		.select('*')
-		.eq('user', user?.id)
+		.in('project', projects.map(p=>p.project))
+	//console.log("expenses: ", expenses)
 
 	revalidatePath('/dashboard')
-	return Expense
+	return expenses
 }

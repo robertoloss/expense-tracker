@@ -8,11 +8,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Dispatch, SetStateAction, use, useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 
 type Props = {
-	date: Date | undefined
-	setDate: Dispatch<SetStateAction<Date | undefined>>
+	date: Date
+	setDate: Dispatch<SetStateAction<Date>>
 }
 export function DatePicker({ date, setDate }: Props) {
 	const [ open, setOpen ] = useState(false)
@@ -23,7 +23,7 @@ export function DatePicker({ date, setDate }: Props) {
         <Button
           variant={"outline"}
           className={cn(
-            "w-[240px] justify-start text-left font-normal",
+            "w-full justify-start text-left font-normal",
             !date && "text-muted-foreground"
           )}
         >
@@ -39,8 +39,10 @@ export function DatePicker({ date, setDate }: Props) {
           mode="single"
           selected={date}
           onSelect={(d)=>{
-						setDate(d)
-						setOpen(false)
+						if (d) {
+							setDate(d)
+							setOpen(false)
+						}
 					}}
           initialFocus
 					captionLayout="dropdown"

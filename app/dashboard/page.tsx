@@ -12,10 +12,9 @@ export default async function ProtectedPage() {
     return redirect("/login");
   }
 	const expenses = await getExpenses() 
+	console.log("expenses: ", expenses)
 	
-	console.log("Number of expenses: ", expenses?.length)
-
   return (
-		<Dashboard expenses={expenses}/>
+		<Dashboard expenses={expenses} user={user}/>
   );
 }

@@ -4,12 +4,13 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLab
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { ListFilterIcon, FileIcon } from "./ui/icons"
-import { Expense } from "@prisma/client"
+import { Expense, Profile, Project } from "@/prisma/prisma-client"
 import TableComponent from "./TableComponent"
 import { createClient } from "@/utils/supabase/client"
-import { useEffect, useOptimistic } from "react"
+import { useEffect, useOptimistic, useState } from "react"
 import getExpenses from "@/app/actions/getExpenses"
 import AddExpense from "./AddExpense"
+import { User } from "@supabase/supabase-js"
 
 export type UpdateExpenses = (action: {
     action: 'create' | 'delete' | 'update';
@@ -18,9 +19,12 @@ export type UpdateExpenses = (action: {
 }) => void
 
 type Props = {
- expenses: Expense[]	| null
+ expenses: Expense[]	| null | undefined
+ user: User | null
 }
-export default function Dashboard({ expenses }: Props)  {
+export default function Dashboard({ expenses, user }: Props)  {
+	const [ project, setProject ] = useState<Project | null>(null)
+	const [ collaborators, setCollaborators ] = useState<Profile[] | null>(null)
 	const supabase = createClient()
 	const [ optimisticExpenses, updateExpenses ] = useOptimistic(expenses, 
 		(state, {action, expense, id} : 
@@ -36,7 +40,22 @@ export default function Dashboard({ expenses }: Props)  {
 					return expense ? [...newArr, expense] : state 
 		}
 	})
-	useEffect(()=>{
+
+	async function selectProject() {
+		const { data, error } = await supabase
+			.from('Project')
+			.select('*')
+			.eq('creator', user?.id);
+		if (error) {
+			console.log(error)
+			return
+		}
+		if (data && data.length > 0) {
+			setProject(data[0])
+		}
+	}
+	useEffect(()=>{	
+		selectProject()
 		const channel = supabase.channel('expenses')
 			.on(
 				'postgres_changes', 
@@ -48,12 +67,37 @@ export default function Dashboard({ expenses }: Props)  {
     };
 	},[supabase])
 
+	async function getCollaborators() {
+		if (expenses) {
+			const profile_ids = expenses.filter(e=>e.made_by).map(e=>e.made_by)
+			let colls: Profile[] = []
+			const { data } : { data: Profile[] | null } = await supabase
+				.from('Profile')
+				.select('*')
+				.in('id', profile_ids)
+			if (!data) setCollaborators(colls)
+			else return setCollaborators(data)
+		}
+	}
+	async function getCategories() {
+	}
+	useEffect(()=>{	
+		getCollaborators()
+	},[expenses])
+
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-y-hidden">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-10">
+							{
+								project && 
+								<h1 className="font-semibold text-2xl hidden lg:block">
+									{project.name}
+								</h1> 
+							}
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="active">Active</TabsTrigger>
@@ -93,14 +137,17 @@ export default function Dashboard({ expenses }: Props)  {
 									</span>
                 </Button>
 								<AddExpense 
+									collaborators={collaborators}
 									updateExpenses={updateExpenses}
+									project={project}
+									user={user}
 								/>	
               </div>
             </div>
             <TabsContent value="all">
               <Card x-chunk="dashboard-06-chunk-0">
                 <CardHeader>
-                  <CardTitle>Products</CardTitle>
+                  <CardTitle className="font-normal text-lg">Expenses</CardTitle>
                   <CardDescription>
 									</CardDescription>
                 </CardHeader>
@@ -108,6 +155,7 @@ export default function Dashboard({ expenses }: Props)  {
 									{
 										//optimisticExpenses && 
 										<TableComponent 
+											collaborators={collaborators}
 											expenses={optimisticExpenses} 
 											updateExpenses={updateExpenses}
 										/>

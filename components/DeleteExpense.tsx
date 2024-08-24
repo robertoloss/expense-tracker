@@ -1,4 +1,3 @@
-import { Expense } from "@prisma/client"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +13,7 @@ import { UpdateExpenses } from "./Dashboard"
 import { useState, useTransition } from "react"
 import { createClient } from "@/utils/supabase/client"
 import getExpenses from "@/app/actions/getExpenses"
+import { Expense } from "@/prisma/prisma-client"
 
 
 type Props = {
