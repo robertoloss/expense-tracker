@@ -40,7 +40,7 @@ export default function DeleteExpense({ expense, updateExpenses }: Props) {
 	return (
 		<AlertDialog open={open} onOpenChange={(open: boolean)=>setOpen(open)}>
 			<AlertDialogTrigger >
-				Delete
+				<h1 className="flex flex-row w-full">Delete</h1>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>

@@ -1,7 +1,5 @@
-import Dashboard from "@/components/Dashboard";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import getExpenses from "../actions/getExpenses";
 
 export const dynamic = 'force-dynamic' 
 
@@ -11,10 +9,8 @@ export default async function ProtectedPage() {
   if (!user) {
     return redirect("/login");
   }
-	const expenses = await getExpenses() 
-	console.log("expenses: ", expenses)
 	
   return (
-		<Dashboard expenses={expenses} user={user}/>
+		<></>
   );
 }

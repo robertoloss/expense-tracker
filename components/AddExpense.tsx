@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { UpdateExpenses } from "./Dashboard"
 import { useRef, useState, useTransition } from "react"
 import { createClient } from "@/utils/supabase/client"
-import { Expense, Profile, Project } from "@/prisma/prisma-client"
+import { Category, Expense, Profile, Project } from "@/prisma/prisma-client"
 import getExpenses from "@/app/actions/getExpenses"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { DatePicker } from "./DatePicker"
@@ -33,12 +33,14 @@ const zAmount = z.number({
 
 type Props = {
 	updateExpenses: UpdateExpenses 
-	project: Project | null
+	project: Project | undefined
 	user: User | null
-	collaborators: Profile[] | null
+	collaborators: Profile[] | undefined
+	categories: Category[] | undefined
 }
-export default function AddExpense({ updateExpenses, project, user, collaborators }: Props) {
+export default function AddExpense({ updateExpenses, project, user, collaborators, categories }: Props) {
   const [ userValue, setUserValue ] = useState("")
+	const [ categoryValue, setCategoryValue ] = useState("")
 	const [ open, setOpen ] = useState(false)
 	const [	date, setDate ] = useState<Date>(new Date())
 	const supabase = createClient()
@@ -95,6 +97,10 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 		if (!userValue || userValue.length  === 0) {
 			return
 		}
+		if (!categoryValue) {
+			console.error("No category selected")
+			return
+		}
 		console.log("userValue: ", userValue)
 		//format the date
 		const tDate = (date as Date)
@@ -116,7 +122,7 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 				amount: amount as unknown as Decimal,
 				expense_date: newDate as unknown as Date,
 				project: project.id, 
-				category: '9385270c-ae75-438f-9b2c-f089607b7f8b' //todo!
+				category: categoryValue 
 			}
 		startTransition(() => updateExpenses({
 			action: 'create',
@@ -168,7 +174,11 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 								</div>
 							</div>
 							<div className="flex flex-row justify-between gap-4 flex-wrap min-[480px]:flex-nowrap">
-								<CategoryPicker project={project} />
+								<CategoryPicker 
+									categories={categories}
+									categoryValue={categoryValue}
+									setCategoryValue={setCategoryValue}
+								/>
 								<UserPicker 
 									collaborators={collaborators}
 									userValue={userValue}

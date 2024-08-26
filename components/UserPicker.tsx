@@ -14,13 +14,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 import { Profile } from "@/prisma/prisma-client"
 
 type Props = {
 	userValue: string
 	setUserValue: Dispatch<SetStateAction<string>>
-	collaborators: Profile[] | null
+	collaborators: Profile[] | undefined
 }
 export function UserPicker({ userValue, setUserValue, collaborators }: Props) {
   const [ open, setOpen ] = useState(false)
@@ -42,7 +42,15 @@ export function UserPicker({ userValue, setUserValue, collaborators }: Props) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
+        <Command
+					filter={(value, search) => {
+						const collab = collaborators?.find((collaborator) => collaborator.id === value) 
+						if (collab?.first_name?.toLowerCase().includes(search.toLowerCase()) ||
+								collab?.last_name?.toLowerCase().includes(search.toLowerCase())
+						) return 1
+						return 0
+					}}
+				>
           <CommandInput placeholder="Search collaborator..." />
           <CommandList>
             <CommandEmpty>No collaborator found.</CommandEmpty>

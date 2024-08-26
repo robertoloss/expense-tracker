@@ -2,9 +2,8 @@
 import { createClient } from "@/utils/supabase/server"
 import { revalidatePath } from "next/cache";
 
-const supabase = createClient()
-
 export default async function getExpenses() {
+	const supabase = createClient()
 	const { data: { user }, } = await supabase.auth.getUser();
 
 	const { data: profile_id } = await supabase

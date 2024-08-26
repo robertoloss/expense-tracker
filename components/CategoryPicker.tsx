@@ -14,38 +14,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { useState } from "react"
-import { Project } from "@/prisma/prisma-client"
+import { Dispatch, SetStateAction, useState } from "react"
+import { Category } from "@/prisma/prisma-client"
 
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: <h1 className="text-destructive">Test</h1>,
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-]
 
 type Props = {
-	project: Project | null
+	categories: Category[] | undefined
+	setCategoryValue: Dispatch<SetStateAction<string>>
+	categoryValue: string 
 }
-export function CategoryPicker({ project }: Props) {
+export function CategoryPicker({ categories, setCategoryValue, categoryValue }: Props) {
   const [open, setOpen] = useState(false)
-  const [value, setValue] = useState("")
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -56,34 +35,39 @@ export function CategoryPicker({ project }: Props) {
           aria-expanded={open}
           className="w-full min-w-[200px] justify-between"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
+          {categoryValue
+            ? categories?.find((category) => category.id === categoryValue)?.name
             : "Category"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder="Search framework..." />
+        <Command 
+					filter={(value, search) => {
+						if (categories?.find((category) => category.id === value)?.name.toLowerCase().includes(search.toLowerCase())) return 1
+						return 0
+					}}
+				>
+          <CommandInput placeholder="Search category..." />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
+            <CommandEmpty>No category found.</CommandEmpty>
             <CommandGroup>
-              {frameworks.map((framework) => (
+              {categories?.map((category) => (
                 <CommandItem
-                  key={framework.value}
-                  value={framework.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue)
+                  key={category.id}
+                  value={category.id}
+                  onSelect={(currentcategoryValue) => {
+                    setCategoryValue(currentcategoryValue === categoryValue ? "" : currentcategoryValue)
                     setOpen(false)
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === framework.value ? "opacity-100" : "opacity-0"
+                      categoryValue === category.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {framework.label}
+                  {category.name}
                 </CommandItem>
               ))}
             </CommandGroup>

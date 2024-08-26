@@ -2,14 +2,15 @@ import { Table, TableHeader, TableRow, TableHead, TableBody } from "@/components
 import { UpdateExpenses } from "./Dashboard"
 import TableRowComp from "./TableRowComp"
 import { v4 as uuidv4 } from 'uuid';
-import { Expense, Profile } from "@/prisma/prisma-client";
+import { Category, Expense, Profile } from "@/prisma/prisma-client";
 
 type Props = {
 	expenses: Expense[] | null | undefined
 	updateExpenses: UpdateExpenses
-	collaborators: Profile[] | null
+	collaborators: Profile[] | undefined
+	categories: Category[] | undefined
 }
-export default function TableComponent({ expenses, updateExpenses, collaborators } : Props) {
+export default function TableComponent({ expenses, updateExpenses, collaborators, categories } : Props) {
 
 	return (
 		<Table>
@@ -27,6 +28,7 @@ export default function TableComponent({ expenses, updateExpenses, collaborators
 			<TableBody>
 				{expenses?.map(expense => 
 					<TableRowComp 
+						categories={categories}
 						key={uuidv4()} 
 						expense={expense} 
 						updateExpenses={updateExpenses}
