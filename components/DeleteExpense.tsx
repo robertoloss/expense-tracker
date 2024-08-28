@@ -14,6 +14,7 @@ import { useState, useTransition } from "react"
 import { createClient } from "@/utils/supabase/client"
 import getExpenses from "@/app/actions/getExpenses"
 import { Expense } from "@/prisma/prisma-client"
+import { useAppStore } from "@/utils/zustand/store"
 
 
 type Props = {
@@ -24,17 +25,21 @@ export default function DeleteExpense({ expense, updateExpenses }: Props) {
 	const [ , startTransition ] = useTransition()
 	const [ open, setOpen ] = useState(false)
 	const supabase = createClient()
+	const setIsLoading = useAppStore(state => state.setIsLoading)
+
 	async function deleteExpense(expense: Expense) {
+		setIsLoading(true)
 		startTransition(()=>updateExpenses({
 			action: 'delete',
 			id: expense.id.toString()
 		}))
+		setOpen(false)
 		await supabase
 			.from('Expense')
 			.delete()
 			.eq('id', expense.id)
-		getExpenses()
-		setOpen(false)
+		await getExpenses()
+		setIsLoading(false)
 	}
 
 	return (

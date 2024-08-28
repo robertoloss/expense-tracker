@@ -7,11 +7,11 @@ type Props = {
 export default function DashboardLayout({ children } : Props) {
 
 	return (
-		<div className="w-full">
+		<div className="flex flex-row w-full">
 			<Sidebar />
-			<div className=" w-full h-full ">
+			<div className="flex flex-col w-full h-full ">
 				<Header />
-				<div className="flex flex-col w-full h-full overflow-hidden">
+				<div className="flex flex-col h-full sm:ml-14">
 					{ children }
 				</div>
 			</div>

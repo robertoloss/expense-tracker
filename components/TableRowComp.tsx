@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { MoveHorizontalIcon } from "./ui/icons"
 import DeleteExpense from "./DeleteExpense"
 import { UpdateExpenses } from "./Dashboard"
+import { useAppStore } from "@/utils/zustand/store"
 
 type Props = {
 	expense: Expense
@@ -18,6 +19,7 @@ export default function TableRowComp({ expense, updateExpenses, collaborators, c
 	const date = new Date(Number(dateParts[0]), Number(dateParts[1]) - 1, Number(dateParts[2]));
 	const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
 	const formattedDate = date.toLocaleDateString('en-US', options);
+	const isLoading = useAppStore(state => state.isLoading)
 
 	const collaboratorArr = collaborators?.filter(c => c.id === expense.made_by) || []
 	let collaborator: Profile | null = null
@@ -39,7 +41,7 @@ export default function TableRowComp({ expense, updateExpenses, collaborators, c
 			<TableCell className="hidden md:table-cell">{`${formattedDate}`}</TableCell>
 			<TableCell>
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenuTrigger asChild disabled={isLoading}>
 						<Button aria-haspopup="true" size="icon" variant="ghost">
 							<MoveHorizontalIcon className="h-4 w-4" />
 							<span className="sr-only">Toggle menu</span>

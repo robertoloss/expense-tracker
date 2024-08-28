@@ -26,6 +26,10 @@ export default async function TablePage({ params }: Props) {
 		getProject(pId),
 		getProjectCategories(pId)
 	])
+
+	if (!collaborators || !collaborators?.map(coll => coll.user).includes(user.id)) {
+		return <h1 className="self-center">No project found</h1>
+	}
 	
   return (
 		<Dashboard 

@@ -21,6 +21,7 @@ import { Decimal } from "@prisma/client/runtime/library"
 import { CategoryPicker } from "./CategoryPicker"
 import { UserPicker } from "./UserPicker"
 import { User } from "@supabase/supabase-js"
+import { useAppStore } from "@/utils/zustand/store"
 
 const zComment = z.string().max(50, {
 	message: "Comment must have at most 50 characters.",
@@ -44,9 +45,10 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 	const [ open, setOpen ] = useState(false)
 	const [	date, setDate ] = useState<Date>(new Date())
 	const supabase = createClient()
-	const [ , startTransition ] = useTransition()
+	const [ isPending, startTransition ] = useTransition()
 	const commentRef = useRef<HTMLInputElement>(null)
 	const amountRef = useRef<HTMLInputElement>(null)
+	const { isLoading, setIsLoading } = useAppStore(state => state)
 
 	function amountHandler() {
 		if (amountRef.current) {
@@ -80,6 +82,8 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 	}
 
   async function onSubmit(data: FormData) {
+		setOpen(false)
+		setIsLoading(true)
 		const comment = data.get("comment")?.toString()
 		const amount = Number(data.get("amount")?.slice(1))
 		const testComment = zComment.safeParse(comment)
@@ -128,18 +132,32 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 			action: 'create',
 			expense: newExpense 
 		}))
+
 		delete (newExpense as { id?: string }).id
 		await supabase
 			.from('Expense')
 			.insert(newExpense)
-		getExpenses()
-		setOpen(false)
+		await getExpenses()
+		setIsLoading(false)
   }
+	function handleOpenChange(open: boolean) {
+		setOpen(open)
+		if (!open) {
+			resetModal()
+		}
+	}
+	function resetModal() {
+		setDate(new Date())
+		setUserValue('')
+		setCategoryValue('')
+		if (amountRef.current) amountRef.current.value = ''
+		if (commentRef.current) commentRef.current.value =''
+	}
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild={true} className="h-8 gap-1">
-				<Button size="sm" >
+		<Dialog data-pending={isPending? "" : undefined} open={open} onOpenChange={handleOpenChange}>
+			<DialogTrigger asChild={true} className="h-8 gap-1" disabled={isLoading}>
+				<Button size="sm" className={`${isLoading ? 'bg-muted-foreground' : 'bg-foreground'}`} >
 					<CirclePlusIcon className="h-3.5 w-3.5" />
 					<span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
 						Add Expense

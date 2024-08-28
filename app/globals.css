@@ -11,6 +11,18 @@ body {
 	}
 }
 
+body[data-scroll-locked] {
+  --removed-body-scroll-bar-size: 0 !important;
+  margin-right: 0 !important; /* Reset margin to avoid accumulation */
+}
+body[data-scroll-locked="1"] {
+  margin-right: 16px !important; /* Add margin for scroll-lock 1 */
+}
+html body[data-scroll-locked="2"] {
+	margin-right: 0px !important;
+}
+ 
+
 @layer base {
 	:root {
 		--background: 0 0% 100%;
