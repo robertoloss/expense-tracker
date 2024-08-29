@@ -2,6 +2,9 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import getAllUserProjects from "../actions/getAllUserProjects";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Suspense } from "react";
+import ProjectLink from "@/components/ProjectLink";
 
 export const dynamic = 'force-dynamic' 
 
@@ -18,12 +21,17 @@ export default async function ProtectedPage() {
 		<div className="p-4 bg-muted/40 h-[calc(100vh-56px)]">
 			<Card x-chunk="dashboard-06-chunk-0" className="flex flex-col h-full">
 				<CardHeader>
-					<CardTitle className="font-normal text-lg">Expenses</CardTitle>
+					<CardTitle className="font-normal text-lg">
+						My projects	
+					</CardTitle>
 					<CardDescription>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{projects && projects.map(p => <h1>p.project.name</h1>)
+					{
+						projects && projects.map(p => (
+							<ProjectLink project={p.project} />
+						))
 					}
 				</CardContent>
 			</Card>

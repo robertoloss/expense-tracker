@@ -7,7 +7,7 @@ import { ListFilterIcon, FileIcon } from "./ui/icons"
 import { Category, Expense, Profile, Project } from "@/prisma/prisma-client"
 import TableComponent from "./TableComponent"
 import { createClient } from "@/utils/supabase/client"
-import { useEffect, useOptimistic } from "react"
+import { useEffect, useOptimistic, useState } from "react"
 import getExpenses from "@/app/actions/getExpenses"
 import AddExpense from "./AddExpense"
 import { User } from "@supabase/supabase-js"
@@ -27,7 +27,9 @@ type Props = {
 }
 export default function Dashboard({ expenses, user, collaborators, project, categories}: Props)  {
 	const supabase = createClient()
-	const [ optimisticExpenses, updateExpenses ] = useOptimistic(expenses, 
+	const [ filteredExpenses, setFilteredExpenses ] = useState<Expense[] | null | undefined>(expenses)
+	const [ activeTab, setActiveTab ] = useState("all")
+	const [ optimisticExpenses, updateExpenses ] = useOptimistic(filteredExpenses, 
 		(state, {action, expense, id} : 
 		{action: 'create' | 'delete' | 'update', expense?: Expense, id?: string }) => {
 			switch (action) {
@@ -53,58 +55,69 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
       channel.unsubscribe();
     };
 	},[supabase])
+
+	useEffect(() => {
+    if (activeTab === "all") {
+      setFilteredExpenses(expenses || [])
+    } 
+		if (activeTab === "thisMonth") {
+      const now = new Date()
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      
+      const thisMonthExpenses = filteredExpenses?.filter(expense => {
+        const expenseDate = new Date(expense.expense_date)
+        return expenseDate >= firstDayOfMonth && expenseDate <= lastDayOfMonth
+      })
+      setFilteredExpenses(thisMonthExpenses || [])
+    }
+		if (categories) {
+			for (let category of categories) {
+				if (activeTab === category.name) {
+					const categoryExpenses = filteredExpenses?.filter(expense => expense.category === category.id)
+					setFilteredExpenses(categoryExpenses || [])
+				}
+			}
+		}
+  }, [activeTab, expenses])
+	
+	const handleTabChange = (value: string) => {
+    setActiveTab(value)
+  }
 	
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-y-hidden">
       <div className="flex flex-col sm:gap-4 sm:py-4 ">
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs defaultValue="all">
+        <main className="grid flex-1 items-start p-4 sm:px-6 sm:py-0 gap-4">
+					{
+						project && 
+						<h1 className="font-semibold text-2xl hidden lg:block">
+							{project.name}
+						</h1> 
+					}
+          <Tabs defaultValue="all" onValueChange={handleTabChange}>
             <div className="flex items-center gap-x-10">
-							{
-								project && 
-								<h1 className="font-semibold text-2xl hidden lg:block">
-									{project.name}
-								</h1> 
-							}
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="draft">Draft</TabsTrigger>
-                <TabsTrigger value="archived" className="hidden sm:flex">
-                  Archived
-                </TabsTrigger>
-              </TabsList>
-              <div className="ml-auto flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                      <ListFilterIcon className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>
-											Filter by
-										</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem checked>
-											Active
-										</DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem>
-											Draft
-										</DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem>
-											Archived
-										</DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button size="sm" variant="outline" className="h-8 gap-1">
-                  <FileIcon className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-									 Export
-									</span>
-                </Button>
+							<div className="flex flex-col gap-2 items-start h-full">
+								<TabsList>
+									<TabsTrigger value="all">
+										All
+									</TabsTrigger>
+									<TabsTrigger value="thisMonth">
+										This month
+									</TabsTrigger>
+								</TabsList>
+								<TabsList>
+									{
+										categories?.map(category => (
+											<TabsTrigger value={category.name}>
+												{category.name}
+											</TabsTrigger>	
+										))
+									}
+								</TabsList>
+							</div>
+              <div className="ml-auto flex items-end h-full gap-2">
 								<AddExpense 
 									categories={categories}
 									collaborators={collaborators}
@@ -114,7 +127,7 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 								/>	
               </div>
             </div>
-            <TabsContent value="all">
+            <TabsContent value={activeTab}>
               <Card x-chunk="dashboard-06-chunk-0">
                 <CardHeader>
                   <CardTitle className="font-normal text-lg">Expenses</CardTitle>
