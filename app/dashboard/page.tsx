@@ -2,11 +2,9 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import getAllUserProjects from "../actions/getAllUserProjects";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { Suspense } from "react";
 import ProjectLink from "@/components/ProjectLink";
 
-export const dynamic = 'force-dynamic' 
+//export const dynamic = 'force-dynamic' 
 
 export default async function ProtectedPage() {
   const supabase = createClient();

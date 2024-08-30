@@ -1,10 +1,13 @@
 'use client'
-
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@radix-ui/react-tooltip"
+import { useRouter } from "next/navigation"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip"
 import Link from "next/link"
+import { useTransition } from "react"
 
 
 export default function Sidebar() {
+	const router = useRouter()
+	const [ isPending, startTransition ] = useTransition()
 
 	return (
 		<div className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -12,7 +15,8 @@ export default function Sidebar() {
 				<TooltipProvider>
 					<Link
 						href="#"
-						className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
+						className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full 
+							bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
 						prefetch={false}
 					>
 						<Package2Icon className="h-4 w-4 transition-all group-hover:scale-110" />
@@ -20,21 +24,25 @@ export default function Sidebar() {
 					</Link>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Link
-								href="#"
-								className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-								prefetch={false}
+							<div
+								className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground
+									transition-colors hover:text-foreground md:h-8 md:w-8 cursor-pointer"
+								onClick={()=>{console.log('click'); startTransition(()=>router.push('/dashboard'))}}
 							>
 								<HomeIcon className="h-5 w-5" />
 								<span className="sr-only">Dashboard</span>
-							</Link>
+							</div>
 						</TooltipTrigger>
-						<TooltipContent side="right">Dashboard</TooltipContent>
+						<TooltipContent 
+							side="right" 
+						>
+							Dashboard
+						</TooltipContent>
 					</Tooltip>
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Link
-								href="#"
+								href="/dashboard"
 								className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
 								prefetch={false}
 							>

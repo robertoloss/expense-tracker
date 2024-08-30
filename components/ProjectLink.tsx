@@ -20,8 +20,8 @@ export default function ProjectLink({ project }: Props) {
   return (
     <button 
       onClick={handleClick}
-      className="w-full text-left flex items-center justify-between 
-				p-4 bg-card hover:bg-accent rounded-lg transition-colors"
+      className="text-left gap-2 transition-all flex items-center justify-between 
+				p-4 bg-card hover:bg-accent rounded-lg "
     >
       <span className="text-xl font-semibold">{project.name}</span>
       {isPending && (

@@ -12,8 +12,6 @@ export default async function Index() {
 					 <ThemeToggle />
         </div>
       </nav>
-
-      
     </div>
   );
 }

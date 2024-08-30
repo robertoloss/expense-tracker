@@ -25,7 +25,14 @@ export default function TableComponent({ expenses, updateExpenses, collaborators
 					</TableHead>
 				</TableRow>
 			</TableHeader>
-			<TableBody>
+			<TableBody className="w-full">
+				{expenses?.length === 0 && 
+					<div className="flex-row flex w-full mt-4">
+						<h1 className="flex flex-row text-sm font-semibold">
+							There are no expenses to display
+						</h1>
+					</div>
+				}
 				{expenses?.map(expense => 
 					<TableRowComp 
 						categories={categories}
