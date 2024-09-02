@@ -11,7 +11,7 @@ import { CirclePlusIcon } from "./ui/icons"
 import { z } from "zod"
 import { Input } from "@/components/ui/input"
 import { UpdateExpenses } from "./Dashboard"
-import { useRef, useState, useTransition } from "react"
+import { Dispatch, SetStateAction, useRef, useState, useTransition } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { Category, Expense, Profile, Project } from "@/prisma/prisma-client"
 import getExpenses from "@/app/actions/getExpenses"
@@ -38,8 +38,10 @@ type Props = {
 	user: User | null
 	collaborators: Profile[] | undefined
 	categories: Category[] | undefined
+	setTotal: Dispatch<SetStateAction<number>> | undefined
+	total: number | undefined
 }
-export default function AddExpense({ updateExpenses, project, user, collaborators, categories }: Props) {
+export default function AddExpense({ updateExpenses, project, user, collaborators, categories, setTotal, total }: Props) {
   const [ userValue, setUserValue ] = useState("")
 	const [ categoryValue, setCategoryValue ] = useState("")
 	const [ open, setOpen ] = useState(false)
@@ -48,6 +50,7 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 	const [ isPending, startTransition ] = useTransition()
 	const commentRef = useRef<HTMLInputElement>(null)
 	const amountRef = useRef<HTMLInputElement>(null)
+	const formRef = useRef<HTMLFormElement>(null)
 	const { isLoading, setIsLoading } = useAppStore(state => state)
 
 	function amountHandler() {
@@ -80,72 +83,68 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 			commentRef.current.value = commentRef.current?.value.slice(0,-1)
 		}
 	}
-
+	function isFormValid(): boolean {
+		if (formRef.current) {
+			const formData = new FormData(formRef.current)
+			const comment = formData.get("comment")?.toString()
+			const amount = Number(formData.get("amount")?.slice(1))
+			const testComment = zComment.safeParse(comment)
+			const testAmount = zAmount.safeParse(amount)
+			if (!testComment.success || !testAmount || !amount) {
+				console.error("test comment error: ", testComment.error?.issues)
+				console.error("terst comment error issues: ", testAmount.error?.issues)
+				setIsLoading(false)
+				return false
+			}
+			if (!project || !user) {
+				if (!project) console.error('No project')
+				if (!user) console.error('No user')
+				setIsLoading(false)
+				return false
+			}
+			if (!userValue || userValue.length  === 0) {
+				setIsLoading(false)
+				return false
+			}
+			if (!categoryValue) {
+				setIsLoading(false)
+				console.error("No category selected")
+				return false
+			}
+			return true
+		} else return false
+	}
   async function onSubmit(data: FormData) {
-		setOpen(false)
-		setIsLoading(true)
+		if (!isFormValid()) return
+
 		const comment = data.get("comment")?.toString()
 		const amount = Number(data.get("amount")?.slice(1))
-		const testComment = zComment.safeParse(comment)
-		const testAmount = zAmount.safeParse(amount)
-		if (!testComment.success || !testAmount || !amount) {
-			console.log(testComment.error?.issues)
-			console.log(testAmount.error?.issues)
-			return
-		}
-		if (!project || !user) {
-			if (!project) console.error('No project')
-			if (!user) console.error('No user')
-			return
-		}
-		if (!userValue || userValue.length  === 0) {
-			return
-		}
-		if (!categoryValue) {
-			console.error("No category selected")
-			return
-		}
-		console.log("userValue: ", userValue)
-		//format the date
-		const tDate = (date as Date)
-		tDate.setHours(4)
-		const year = tDate.getFullYear()
-		const month = tDate.getMonth() + 1
-		const day = tDate.getDate()
-		let dayString = day.toString()
-		if (day < 10) dayString = '0' + dayString
-		let monthString = month.toString()
-		if (month < 10) monthString = '0' + monthString
-		const newDate = year + '-' + monthString + '-' + dayString 
-
+		const tDate = new Date(date)
 		const newExpense: Expense = {
-				id: Math.random().toString(),
-				comment: comment!,
-				created_at: new Date(),
-				made_by: userValue,
-				amount: amount as unknown as Decimal,
-				expense_date: newDate as unknown as Date,
-				project: project.id, 
-				category: categoryValue 
-			}
-		startTransition(() => updateExpenses({
-			action: 'create',
-			expense: newExpense 
-		}))
-
-		delete (newExpense as { id?: string }).id
+			id: 'dummyId',
+			comment: comment!,
+			created_at: new Date(),
+			made_by: userValue,
+			amount: amount as unknown as Decimal,
+			expense_date: tDate.toISOString().replace('Z', '') as unknown as Date, 
+			project: project!.id, 
+			category: categoryValue 
+		}
+		startTransition(() => {
+			updateExpenses({
+				action: 'create',
+				expense: newExpense 
+			})
+		})
+		const newExpenseNew = {...newExpense}	
+		delete (newExpenseNew as { id?: string }).id
 		await supabase
 			.from('Expense')
-			.insert(newExpense)
+			.insert(newExpenseNew)
 		await getExpenses()
 		setIsLoading(false)
   }
-	function handleOpenChange(open: boolean) {
-		setOpen(open)
-		if (!open) {
-			resetModal()
-		}
-	}
+
 	function resetModal() {
 		setDate(new Date())
 		setUserValue('')
@@ -153,9 +152,14 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 		if (amountRef.current) amountRef.current.value = ''
 		if (commentRef.current) commentRef.current.value =''
 	}
+	function handleOnOpenChange(open: boolean) {
+		setOpen(open)
+		resetModal()
+		console.log("handleOnOpenChange")
+	}
 
 	return (
-		<Dialog data-pending={isPending? "" : undefined} open={open} onOpenChange={handleOpenChange}>
+		<Dialog data-pending={isPending? "" : undefined} open={open} onOpenChange={handleOnOpenChange}>
 			<DialogTrigger asChild={true} className="h-8 gap-1" disabled={isLoading}>
 				<Button size="sm" className={`${isLoading ? 'bg-muted-foreground' : 'bg-foreground'}`} >
 					<CirclePlusIcon className="h-3.5 w-3.5" />
@@ -173,6 +177,7 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 						</VisuallyHidden>
 					</DialogDescription>
 						<form
+							ref={formRef}
 							action={onSubmit}
 							className="space-y-4 flex flex-col"
 						>	
@@ -210,7 +215,20 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 								placeholder="Comment (optional, 50 chars max)"
 								onChange={commentHandler}
 							/>
-							<Button type="submit">Submit</Button>
+							<Button type="submit" 
+								onClick={()=>{
+									if (formRef.current) {
+										if (!isFormValid()) return
+										setOpen(false)
+										const data = new FormData(formRef?.current)
+										const amount = Number(data.get("amount")?.slice(1))
+										setTotal(total + amount)
+										setIsLoading(true)
+									}
+								}}
+							>	
+								Submit
+							</Button>
 						</form>
 				</DialogHeader>
 			</DialogContent>

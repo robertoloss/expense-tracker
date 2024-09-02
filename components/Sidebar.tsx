@@ -14,7 +14,7 @@ export default function Sidebar() {
 			icon: <HomeIcon className="h-5 w-5" />
 		},
 		{
-			href: '/',
+			href: `/dashboard/${id}`,
 			label: 'Expenses',
 			icon: <ShoppingCartIcon className="h-5 w-5" />
 		},

@@ -16,11 +16,13 @@ type Props = {
 	categories: Category[] | undefined
 }
 export default function TableRowComp({ expense, updateExpenses, collaborators, categories }: Props) {
-	const dateParts = (expense?.expense_date).toString().split('-');
-	const date = new Date(Number(dateParts[0]), Number(dateParts[1]) - 1, Number(dateParts[2]));
-	const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
-	const formattedDate = date.toLocaleDateString('en-US', options);
+	const date = new Date(expense.expense_date)
+	const year = date.getFullYear()
+	const month = date.getMonth() + 1;
+	const day = date.getDate();
+
 	const isLoading = useAppStore(state => state.isLoading)
+	const formattedDate = (year + '-' + (month < 10?'0':'') + month + '-' + (day<10 ? '0' : '' ) + day);
 
 	const collaboratorArr = collaborators?.filter(c => c.id === expense.made_by) || []
 	let collaborator: Profile | null = null
@@ -39,7 +41,7 @@ export default function TableRowComp({ expense, updateExpenses, collaborators, c
 			<TableCell className="hidden md:table-cell">
 				<DollarAmountSmall amount={expense.amount as unknown as number} />
 			</TableCell>
-			<TableCell className="hidden md:table-cell">{`${formattedDate}`}</TableCell>
+			<TableCell className="hidden md:table-cell">{formattedDate}</TableCell>
 			<TableCell>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild disabled={isLoading}>

@@ -39,8 +39,17 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 		{action: 'create' | 'delete' | 'update', expense?: Expense, id?: string }) => {
 			switch (action) {
 				case "create":
-					const result = expense && state ? [...state, expense] : state || [] 
-					return result 
+					if (expense && state && state.length > 0) {
+						const newArray = [expense, ...state].sort(
+							(a,b) => {
+								const aTime = new Date(a.expense_date)
+								const bTime = new Date(b.expense_date)
+								return bTime.getTime() - aTime.getTime()
+							}
+						)
+						return newArray
+					}
+					return state || null 
 				case "delete":
 					return id && state ? state.filter(e => e.id.toString() != id) : state || []
 				case "update":
@@ -48,8 +57,6 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 					return expense ? [...newArr, expense] : state 
 		}
 	})
-
-	console.log(filteredExpenses)
 
 	useEffect(()=>{	
 		const channel = supabase.channel('expenses')
@@ -63,14 +70,16 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
     };
 	},[supabase])
 
+
 	useEffect(() => {
+		//console.log("use effect in Dashboard")
 		if (!expenses) return
 		let newExpenses = [...expenses]
     if (period === "thisMonth") {
       const now = new Date()
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
       const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-			console.log(firstDayOfMonth, lastDayOfMonth)
+			//console.log(firstDayOfMonth, lastDayOfMonth)
       
       newExpenses = newExpenses?.filter(expense => {
         const expenseDate = new Date(expense.expense_date)
@@ -95,13 +104,20 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 				}
 			}
 		}
+		newExpenses.sort((a, b) => {
+			const dateAnew =  new Date(a.expense_date) ;
+			const dateBnew =  new Date(b.expense_date) ;
+			const dateA = dateAnew.getTime()
+			const dateB = dateBnew.getTime()
+			return dateB - dateA;
+		})
 		setFilteredExpenses(newExpenses || [])
 		setTotal(newExpenses?.reduce((acc, expense)=> acc + (expense.amount as unknown as number), 0))
-  }, [period, selectedCategory, expenses, selectedUser])
+  }, [ period, selectedCategory, expenses, selectedUser ])
 	
+
 	const handlePeriodChange = (value: string) => {
     setPeriod(value)
-		console.log(period)
   }
 	const handleCategoryChange = (value: string) => {
     setSelectedCategory(value)
@@ -147,6 +163,8 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 								updateExpenses={updateExpenses}
 								project={project}
 								user={user}
+								setTotal={setTotal}
+								total={total}
 							/>	
 						</div>
 					</div>
