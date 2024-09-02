@@ -1,4 +1,4 @@
-import { Table, TableHeader, TableRow, TableHead, TableBody } from "@/components/ui/table"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { UpdateExpenses } from "./Dashboard"
 import TableRowComp from "./TableRowComp"
 import { v4 as uuidv4 } from 'uuid';
@@ -27,11 +27,11 @@ export default function TableComponent({ expenses, updateExpenses, collaborators
 			</TableHeader>
 			<TableBody className="w-full">
 				{expenses?.length === 0 && 
-					<div className="flex-row flex w-full mt-4">
-						<h1 className="flex flex-row text-sm font-semibold">
+					<TableRow>
+						<TableCell className="flex flex-row text-sm font-semibold mt-4">
 							There are no expenses to display
-						</h1>
-					</div>
+						</TableCell>
+					</TableRow>
 				}
 				{expenses?.map(expense => 
 					<TableRowComp 

@@ -5,7 +5,6 @@ import getProjectExpenses from "@/app/actions/getProjectExpenses";
 import Dashboard from "@/components/Dashboard";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export const dynamic = 'force-dynamic' 
 
@@ -33,7 +32,6 @@ export default async function TablePage({ params }: Props) {
 	}
 	
   return (
-		<Suspense fallback={<h1> Loading ... </h1>}>
 			<Dashboard 
 				expenses={expenses} 
 				user={user}
@@ -41,6 +39,5 @@ export default async function TablePage({ params }: Props) {
 				project={project}
 				categories={categories}
 			/>
-		</Suspense>
   );
 }

@@ -3,21 +3,15 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Category, Expense, Profile, Project } from "@/prisma/prisma-client"
 import TableComponent from "./TableComponent"
 import { createClient } from "@/utils/supabase/client"
-import { use, useEffect, useOptimistic, useState } from "react"
+import { useEffect, useOptimistic, useState } from "react"
 import getExpenses from "@/app/actions/getExpenses"
 import AddExpense from "./AddExpense"
 import { User } from "@supabase/supabase-js"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import DDownPeriod from "./DDownPeriod"
 import DDownCategory from "./DDownCategory"
 import DDownUser from "./DDownUser"
+import DollarAmountCardBig from "./DollarAmountCardBig"
+import ResetDDownsButton from "./ResetDDownsButton"
 
 export type UpdateExpenses = (action: {
     action: 'create' | 'delete' | 'update';
@@ -34,6 +28,8 @@ type Props = {
 }
 export default function Dashboard({ expenses, user, collaborators, project, categories}: Props)  {
 	const supabase = createClient()
+	const [ reset, setReset ] = useState(false)
+	const [ total, setTotal ] = useState(expenses?.reduce((acc, expense)=> acc + (expense.amount as unknown as number), 0))
 	const [ filteredExpenses, setFilteredExpenses ] = useState<Expense[] | null | undefined>(expenses)
 	const [ period, setPeriod ] = useState('all')
 	const [ selectedCategory, setSelectedCategory ] = useState('all')
@@ -52,6 +48,8 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 					return expense ? [...newArr, expense] : state 
 		}
 	})
+
+	console.log(filteredExpenses)
 
 	useEffect(()=>{	
 		const channel = supabase.channel('expenses')
@@ -72,9 +70,12 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
       const now = new Date()
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
       const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+			console.log(firstDayOfMonth, lastDayOfMonth)
       
       newExpenses = newExpenses?.filter(expense => {
         const expenseDate = new Date(expense.expense_date)
+				expenseDate.setHours(expenseDate.getHours() + 4)
+				//console.log("expenseDate: ", expenseDate)
         return expenseDate >= firstDayOfMonth && expenseDate <= lastDayOfMonth
       })
     }
@@ -86,9 +87,7 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 				}
 			}
 		}
-		console.log("ciaoo")
 		if (collaborators) {
-			console.log("collaborators")
 			for (let user of collaborators) {
 				if ( selectedUser === user.id) {
 					newExpenses = newExpenses?.filter(expense => expense.made_by === user.id)
@@ -97,19 +96,20 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 			}
 		}
 		setFilteredExpenses(newExpenses || [])
+		setTotal(newExpenses?.reduce((acc, expense)=> acc + (expense.amount as unknown as number), 0))
   }, [period, selectedCategory, expenses, selectedUser])
 	
 	const handlePeriodChange = (value: string) => {
     setPeriod(value)
+		console.log(period)
   }
 	const handleCategoryChange = (value: string) => {
     setSelectedCategory(value)
   }
 	const handleUserChange = (value: string) => {
-		console.log("User change: ", value)
     setSelectedUser(value)
   }
-	
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-y-hidden">
@@ -123,9 +123,21 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 					<div className="flex items-center gap-x-10">
 						<div className="flex flex-col gap-2 items-start h-full">
 							<div className="flex flex-row gap-2">
-								<DDownPeriod handlePeriodChange={handlePeriodChange} />
-								<DDownCategory handleCategoryChange={handleCategoryChange} categories={categories}/>
-								<DDownUser handleUserChange={handleUserChange} users={collaborators} />
+								<DDownPeriod 
+									handlePeriodChange={handlePeriodChange} 
+									reset={reset}
+								/>
+								<DDownCategory 
+									handleCategoryChange={handleCategoryChange}
+									categories={categories}
+									reset={reset}
+								/>
+								<DDownUser 
+									handleUserChange={handleUserChange} 
+									users={collaborators}
+									reset={reset}
+								/>
+								<ResetDDownsButton onClick={()=>setReset(p=>!p)} disabled={false}/>
 							</div>
 						</div>
 						<div className="ml-auto flex items-end h-full gap-2">
@@ -140,20 +152,19 @@ export default function Dashboard({ expenses, user, collaborators, project, cate
 					</div>
 					<Card x-chunk="dashboard-06-chunk-0">
 						<CardHeader>
-							<CardTitle className="font-normal text-lg">Expenses</CardTitle>
+							<CardTitle className="font-normal text-lg">
+								<DollarAmountCardBig amount={total} />
+							</CardTitle>
 							<CardDescription>
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							{
-								//optimisticExpenses && 
-								<TableComponent 
-									categories={categories}
-									collaborators={collaborators}
-									expenses={optimisticExpenses} 
-									updateExpenses={updateExpenses}
-								/>
-							}
+							<TableComponent 
+								categories={categories}
+								collaborators={collaborators}
+								expenses={optimisticExpenses} 
+								updateExpenses={updateExpenses}
+							/>
 						</CardContent>
 					</Card>
         </main>

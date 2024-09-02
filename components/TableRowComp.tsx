@@ -7,6 +7,7 @@ import { MoveHorizontalIcon } from "./ui/icons"
 import DeleteExpense from "./DeleteExpense"
 import { UpdateExpenses } from "./Dashboard"
 import { useAppStore } from "@/utils/zustand/store"
+import DollarAmountSmall from "./DollarAmountSmall"
 
 type Props = {
 	expense: Expense
@@ -36,7 +37,7 @@ export default function TableRowComp({ expense, updateExpenses, collaborators, c
 				<Badge variant="outline">{category ? category.name : 'Uncategorized'}</Badge>
 			</TableCell>
 			<TableCell className="hidden md:table-cell">
-				${expense.amount?.toString()}
+				<DollarAmountSmall amount={expense.amount as unknown as number} />
 			</TableCell>
 			<TableCell className="hidden md:table-cell">{`${formattedDate}`}</TableCell>
 			<TableCell>
