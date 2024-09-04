@@ -39,7 +39,7 @@ export default function DeleteExpense({ expense, updateExpenses }: Props) {
 			.delete()
 			.eq('id', expense.id)
 		await getExpenses()
-		setIsLoading(false)
+		setTimeout(()=>setIsLoading(false),500)
 	}
 
 	return (

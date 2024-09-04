@@ -1,3 +1,3 @@
 ## An expense tracker built with Next.js and Supabase! 
 
-[work in progress - more details coming soon..]
+This project moved to the repo 'expense-tracker-new' [(link)](https://github.com/robertoloss/expense-tracker-new)

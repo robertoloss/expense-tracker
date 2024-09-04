@@ -38,7 +38,7 @@ type Props = {
 	user: User | null
 	collaborators: Profile[] | undefined
 	categories: Category[] | undefined
-	setTotal: Dispatch<SetStateAction<number>> | undefined
+	setTotal: Dispatch<SetStateAction<number | undefined>>
 	total: number | undefined
 }
 export default function AddExpense({ updateExpenses, project, user, collaborators, categories, setTotal, total }: Props) {
@@ -142,7 +142,7 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 			.from('Expense')
 			.insert(newExpenseNew)
 		await getExpenses()
-		setIsLoading(false)
+		setTimeout(()=>setIsLoading(false),500)
   }
 
 	function resetModal() {
@@ -222,7 +222,7 @@ export default function AddExpense({ updateExpenses, project, user, collaborator
 										setOpen(false)
 										const data = new FormData(formRef?.current)
 										const amount = Number(data.get("amount")?.slice(1))
-										setTotal(total + amount)
+										setTotal(total || 0 + amount)
 										setIsLoading(true)
 									}
 								}}

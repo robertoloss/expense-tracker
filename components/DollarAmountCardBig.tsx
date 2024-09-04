@@ -15,9 +15,9 @@ export default function DollarAmountCardBig({ amount }: Props) {
 
   return (
 		<div className="flex items-baseline space-x-2">
-			<span className="text-xl text-gray-900">Total:</span>
+			<span className="text-xl text-foreground">Total:</span>
 			<span 
-				className="text-xl font-bold text-gray-900" 
+				className="text-xl font-bold text-foreground" 
 				aria-label={`${formatDollarAmount(amount)}`}
 			>
 				{formatDollarAmount(amount)}
